@@ -9,7 +9,17 @@ export default class Title extends Phaser.State {
     private blurXFilter: Phaser.Filter.BlurX = null;
     private blurYFilter: Phaser.Filter.BlurY = null;
     private sfxAudiosprite: Phaser.AudioSprite = null;
-    private mummySpritesheet: Phaser.Sprite = null;
+    private actionJoey: Phaser.Sprite = null;
+    private bullet: Phaser.Sprite = null;
+    private shotgun: Phaser.Sprite = null;
+    private actionJoeyDirection = false;
+
+    // Define constants
+    private SHOT_DELAY = 100; // milliseconds (10 bullets/second)
+    private BULLET_SPEED = 1200; // pixels/second
+    private NUMBER_OF_BULLETS = 1;
+    private lastBulletShotAt = 0;
+    private bulletPool = null;
 
     // This is any[] not string[] due to a limitation in TypeScript at the moment;
     // despite string enums working just fine, they are not officially supported so we trick the compiler into letting us do it anyway.
@@ -42,9 +52,23 @@ export default class Title extends Phaser.State {
 
         this.bitmapFontText.filters = [this.blurXFilter, this.blurYFilter];
 
-        this.mummySpritesheet = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 175, Assets.Spritesheets.SpritesheetsMetalslugMummy.getName());
-        this.mummySpritesheet.animations.add('walk');
-        this.mummySpritesheet.animations.play('walk', 30, true);
+        this.bullet = this.game.add.sprite(null, null, Assets.Images.ImagesBulletPng12.getName());
+        this.bullet.anchor.setTo(0.5,0.5);
+        this.bulletPool = this.game.add.group();
+        this.bulletPool.add(this.bullet);
+        this.game.physics.enable(this.bullet, Phaser.Physics.ARCADE);
+        this.bullet.kill();
+        this.shotgun = this.game.add.sprite(null, null, Assets.Images.ImagesShotgun.getName());
+        
+
+        this.actionJoey = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 135, Assets.Spritesheets.SpritesheetsActionjoeyspritesheet.getName());
+        this.actionJoey.animations.add('walk');
+        this.actionJoey.animations.play('walk', 12, true);
+
+
+        this.game.input.keyboard.addKeyCapture(
+            [38,40,37,39, 65, 68, 83]
+        );
 
         this.sfxAudiosprite = this.game.add.audioSprite(Assets.Audiosprites.AudiospritesSfx.getName());
 
@@ -70,5 +94,74 @@ export default class Title extends Phaser.State {
         });
 
         this.game.camera.flash(0x000000, 1000);
+    }
+
+    public update():void  {
+        this.shotgun.position.x = this.actionJoey.position.x - 20;
+        this.shotgun.position.y = this.actionJoey.position.y + 40;
+        if(this.leftInputIsActive()) {
+            
+            if(!this.actionJoeyDirection){
+                this.actionJoeyDirection = true;
+                this.actionJoey.position.x += this.actionJoey.width;
+                 this.actionJoey.scale.x = this.actionJoey.scale.x * -1;
+            }
+                
+            this.actionJoey.position.x -= 1.5;
+
+        }
+        if(this.rightInputIsActive()) {
+             if(this.actionJoeyDirection){
+                this.actionJoeyDirection = false;
+                 this.actionJoey.position.x += this.actionJoey.width;
+                 this.actionJoey.scale.x = this.actionJoey.scale.x * -1;
+            }
+                
+            this.actionJoey.position.x += 1.5;
+
+        }
+
+        if(this.input.keyboard.isDown(83)) {
+            this.fireBullet();
+        }
+    }
+
+    public fireBullet():void {      
+        if (this.game.time.now - this.lastBulletShotAt < this.SHOT_DELAY) return;
+        this.lastBulletShotAt = this.game.time.now;
+
+        // Get a dead bullet from the pool
+        var bullet = this.bulletPool.getFirstDead();
+
+        // If there aren't any bullets available then don't shoot
+        if (bullet === null || bullet === undefined) return;
+
+        bullet.revive();
+
+        bullet.checkWorldBounds = true;
+        bullet.outOfBoundsKill = true;
+
+        // Set the bullet position to the gun position.
+        bullet.reset(this.actionJoey.x, this.actionJoey.y + this.actionJoey.height/2);
+
+        // Shoot it
+        bullet.body.velocity.x = this.BULLET_SPEED;
+        bullet.body.velocity.y = 0;
+      
+    }
+
+    public leftInputIsActive():any {
+        var isActive = false;
+
+        isActive = this.input.keyboard.isDown(Phaser.Keyboard.LEFT || Phaser.Keyboard.A);
+
+        return isActive;
+    }
+    public rightInputIsActive():any {
+        var isActive = false;
+
+        isActive = this.input.keyboard.isDown(Phaser.Keyboard.RIGHT || Phaser.Keyboard.D);
+
+        return isActive;
     }
 }

@@ -6,9 +6,29 @@ export namespace Images {
 
         static getPNG(): string { return require('assets/images/background_template.png'); }
     }
+    export class ImagesBulletPng12 {
+        static getName(): string { return 'bullet-png-12'; }
+
+        static getPNG(): string { return require('assets/images/bullet-png-12.png'); }
+    }
+    export class ImagesShotgun {
+        static getName(): string { return 'shotgun'; }
+
+        static getPNG(): string { return require('assets/images/shotgun.png'); }
+    }
 }
 
 export namespace Spritesheets {
+    export class SpritesheetsActionjoeyspritesheet {
+        static getName(): string { return 'actionjoeyspritesheet'; }
+
+        static getPNG(): string { return require('assets/spritesheets/actionjoeyspritesheet.[50,100,3,0,0].png'); }
+        static getFrameWidth(): number { return 50; }
+        static getFrameHeight(): number { return 100; }
+        static getFrameMax(): number { return 3; }
+        static getMargin(): number { return 0; }
+        static getSpacing(): number { return 0; }
+    }
     export class SpritesheetsMetalslugMummy {
         static getName(): string { return 'metalslug_mummy'; }
 
