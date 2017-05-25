@@ -3,21 +3,27 @@ import * as Assets from '../assets';
 export default class Title extends Phaser.State {
     private backgroundTemplateSprite: Phaser.Sprite = null;
     private googleFontText: Phaser.Text = null;
-    private localFontText: Phaser.Text = null;
-    private pixelateShader: Phaser.Filter = null;
-    private bitmapFontText: Phaser.BitmapText = null;
-    private blurXFilter: Phaser.Filter.BlurX = null;
-    private blurYFilter: Phaser.Filter.BlurY = null;
+    private scoreText: Phaser.Text = null;
+    private playerScore: number = 0;
+    // private localFontText: Phaser.Text = null;
+    // private pixelateShader: Phaser.Filter = null;
+    // private bitmapFontText: Phaser.BitmapText = null;
+    // private blurXFilter: Phaser.Filter.BlurX = null;
+    // private blurYFilter: Phaser.Filter.BlurY = null;
     private sfxAudiosprite: Phaser.AudioSprite = null;
     private actionJoey: Phaser.Sprite = null;
     private bullet: Phaser.Sprite = null;
     private shotgun: Phaser.Sprite = null;
     private actionJoeyDirection = false;
+    private actionJoeyModel = {
+        direction: false,
+        moveSpeed: 1.5,
+    };
 
     // Define constants
     private SHOT_DELAY = 100; // milliseconds (10 bullets/second)
-    private BULLET_SPEED = 1200; // pixels/second
-    private NUMBER_OF_BULLETS = 1;
+    private BULLET_SPEED = 1000; // pixels/second
+    private NUMBER_OF_BULLETS = 3;
     private lastBulletShotAt = 0;
     private bulletPool = null;
 
@@ -29,28 +35,31 @@ export default class Title extends Phaser.State {
         this.backgroundTemplateSprite = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, Assets.Images.ImagesBackgroundTemplate.getName());
         this.backgroundTemplateSprite.anchor.setTo(0.5);
 
-        this.googleFontText = this.game.add.text(this.game.world.centerX, this.game.world.centerY - 100, 'ACTION JOEY', {
+        this.googleFontText = this.game.add.text(this.game.world.width /3, this.game.world.y + 40, 'ACTION JOEY', {
             font: '50px ' + Assets.GoogleWebFonts.Barrio
+        });
+        this.scoreText = this.game.add.text(this.game.world.width - 200, this.game.world.y + 40, "Score: " +  this.playerScore.toString(), {
+            font: '20px ' + Assets.GoogleWebFonts.Barrio
         });
         this.googleFontText.anchor.setTo(0.5);
 
-        this.localFontText = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'Local Fonts + Shaders .frag (Pixelate here)!', {
-            font: '30px ' + Assets.CustomWebFonts.Fonts2DumbWebfont.getFamily()
-        });
-        this.localFontText.anchor.setTo(0.5);
+        // this.localFontText = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'Local Fonts + Shaders .frag (Pixelate here)!', {
+        //     font: '30px ' + Assets.CustomWebFonts.Fonts2DumbWebfont.getFamily()
+        // });
+        // this.localFontText.anchor.setTo(0.5);
 
-        this.pixelateShader = new Phaser.Filter(this.game, null, this.game.cache.getShader(Assets.Shaders.ShadersPixelate.getName()));
-        this.localFontText.filters = [this.pixelateShader];
+        // this.pixelateShader = new Phaser.Filter(this.game, null, this.game.cache.getShader(Assets.Shaders.ShadersPixelate.getName()));
+        // this.localFontText.filters = [this.pixelateShader];
 
-        this.bitmapFontText = this.game.add.bitmapText(this.game.world.centerX, this.game.world.centerY + 100, Assets.BitmapFonts.FontsFontFnt.getName(), 'Bitmap Fonts + Filters .js (Blur here)!', 40);
-        this.bitmapFontText.anchor.setTo(0.5);
+        // this.bitmapFontText = this.game.add.bitmapText(this.game.world.centerX, this.game.world.centerY + 100, Assets.BitmapFonts.FontsFontFnt.getName(), 'Bitmap Fonts + Filters .js (Blur here)!', 40);
+        // this.bitmapFontText.anchor.setTo(0.5);
 
-        this.blurXFilter = this.game.add.filter(Assets.Scripts.ScriptsBlurX.getName()) as Phaser.Filter.BlurX;
-        this.blurXFilter.blur = 8;
-        this.blurYFilter = this.game.add.filter(Assets.Scripts.ScriptsBlurY.getName()) as Phaser.Filter.BlurY;
-        this.blurYFilter.blur = 2;
+        // this.blurXFilter = this.game.add.filter(Assets.Scripts.ScriptsBlurX.getName()) as Phaser.Filter.BlurX;
+        // this.blurXFilter.blur = 8;
+        // this.blurYFilter = this.game.add.filter(Assets.Scripts.ScriptsBlurY.getName()) as Phaser.Filter.BlurY;
+        // this.blurYFilter.blur = 2;
 
-        this.bitmapFontText.filters = [this.blurXFilter, this.blurYFilter];
+        // this.bitmapFontText.filters = [this.blurXFilter, this.blurYFilter];
 
         this.bullet = this.game.add.sprite(null, null, Assets.Images.ImagesBulletPng12.getName());
         this.bullet.anchor.setTo(0.5,0.5);
@@ -65,11 +74,11 @@ export default class Title extends Phaser.State {
         this.actionJoey.anchor.setTo(.5,.5);
 
         this.shotgun = this.game.add.sprite(null, null, Assets.Images.ImagesShotgun.getName());
-        this.shotgun.anchor.setTo(.08, .8);
+        this.shotgun.anchor.setTo(.08, .7);
 
 
         this.game.input.keyboard.addKeyCapture(
-            [38,40,37,39, 65, 68, 83]
+            [ 38, 40, 37, 39, 65, 68, 83]
         );
 
         this.sfxAudiosprite = this.game.add.audioSprite(Assets.Audiosprites.AudiospritesSfx.getName());
@@ -88,43 +97,49 @@ export default class Title extends Phaser.State {
             availableSFX.Laser9
         ];
 
-        this.game.sound.play(Assets.Audio.AudioMusic.getName(), 0.2, true);
+        //this.game.sound.play(Assets.Audio.AudioMusic.getName(), 0.2, true);
 
         this.backgroundTemplateSprite.inputEnabled = true;   
 
         this.game.camera.flash(0x000000, 1000);
     }
 
-    public update():void  {
+    public update(): void  {
         this.shotgun.position.x = this.actionJoey.position.x;
-        this.shotgun.position.y = this.actionJoey.position.y;
+        this.shotgun.position.y = this.actionJoey.position.y + 10;
 
         if(this.leftInputIsActive()) {
             
-            if(!this.actionJoeyDirection){
-                this.actionJoeyDirection = true;                
-                 this.actionJoey.scale.x = this.actionJoey.scale.x * -1;
+            if(!this.actionJoeyModel.direction){
+                this.actionJoeyModel.direction = true;
+                this.flipSprite(this.bullet);
+                this.flipSprite(this.shotgun);                
+                this.flipSprite(this.actionJoey);
             }
                 
-            this.actionJoey.position.x -= 1.5;
+            this.actionJoey.position.x -= this.actionJoeyModel.moveSpeed;
 
         }
         if(this.rightInputIsActive()) {
-             if(this.actionJoeyDirection){
-                this.actionJoeyDirection = false;               
-                 this.actionJoey.scale.x = this.actionJoey.scale.x * -1;
+             if(this.actionJoeyModel.direction){
+                this.actionJoeyModel.direction = false;  
+                this.flipSprite(this.bullet);      
+                this.flipSprite(this.shotgun);        
+                this.flipSprite(this.actionJoey);
             }
                 
-            this.actionJoey.position.x += 1.5;
+            this.actionJoey.position.x += this.actionJoeyModel.moveSpeed;
 
         }
 
         if(this.input.keyboard.isDown(83)) {
             this.fireBullet();
+            this.playerScore += 100;
+            this.scoreText.setText('Score: ' + this.playerScore.toString());
         }
     }
 
-    public fireBullet():void {      
+    public fireBullet(): void {      
         if (this.game.time.now - this.lastBulletShotAt < this.SHOT_DELAY) return;
         this.lastBulletShotAt = this.game.time.now;
 
@@ -140,27 +155,27 @@ export default class Title extends Phaser.State {
         bullet.outOfBoundsKill = true;
 
         // Set the bullet position to the gun position.
-        bullet.reset(this.shotgun.position.x, this.shotgun.position.y - 6);
+        bullet.reset(this.shotgun.position.x, this.shotgun.position.y - 10);
 
         // Shoot it
         bullet.body.velocity.x = this.BULLET_SPEED;
         bullet.body.velocity.y = 0;
-        this.sfxAudiosprite.play(Phaser.ArrayUtils.getRandomItem(this.sfxLaserSounds));
+        //this.sfxAudiosprite.play(Phaser.ArrayUtils.getRandomItem(this.sfxLaserSounds));
       
     }
 
-    public leftInputIsActive():any {
+    public flipSprite(sprite): void {
+        sprite.scale.x = sprite.scale.x * -1;
+    }
+
+    public leftInputIsActive(): any {
         var isActive = false;
-
         isActive = this.input.keyboard.isDown(Phaser.Keyboard.LEFT || Phaser.Keyboard.A);
-
         return isActive;
     }
-    public rightInputIsActive():any {
+    public rightInputIsActive(): any {
         var isActive = false;
-
         isActive = this.input.keyboard.isDown(Phaser.Keyboard.RIGHT || Phaser.Keyboard.D);
-
         return isActive;
     }
 }
