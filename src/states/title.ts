@@ -21,9 +21,9 @@ export default class Title extends Phaser.State {
     };
 
     // Define constants
-    private SHOT_DELAY = 100; // milliseconds (10 bullets/second)
-    private BULLET_SPEED = 1000; // pixels/second
-    private NUMBER_OF_BULLETS = 3;
+    private SHOT_DELAY = 200; // milliseconds (10 bullets/second)
+    private BULLET_SPEED = 650; // pixels/second
+    private NUMBER_OF_BULLETS = 10;
     private lastBulletShotAt = 0;
     private bulletPool = null;
 
@@ -61,12 +61,17 @@ export default class Title extends Phaser.State {
 
         // this.bitmapFontText.filters = [this.blurXFilter, this.blurYFilter];
 
-        this.bullet = this.game.add.sprite(null, null, Assets.Images.ImagesBulletPng12.getName());
-        this.bullet.anchor.setTo(0.5,0.5);
+        // this.bullet = this.game.add.sprite(null, null, Assets.Images.ImagesBulletPng12.getName());
+        // this.bullet.anchor.setTo(0.5,0.5);
         this.bulletPool = this.game.add.group();
-        this.bulletPool.add(this.bullet);
-        this.game.physics.enable(this.bullet, Phaser.Physics.ARCADE);
-        this.bullet.kill();
+       
+        for(var i = 0; i < this.NUMBER_OF_BULLETS; i++) {
+             var b = this.game.add.sprite(0, 0, Assets.Images.ImagesBulletPng12.getName());
+             this.bulletPool.add(b);
+             b.anchor.setTo(.5,.5);
+             this.game.physics.enable(b, Phaser.Physics.ARCADE);
+             b.kill();
+        }
         
         this.actionJoey = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 155, Assets.Spritesheets.SpritesheetsActionjoeyspritesheet.getName());
         this.actionJoey.animations.add('walk');
@@ -108,6 +113,8 @@ export default class Title extends Phaser.State {
         this.shotgun.position.x = this.actionJoey.position.x;
         this.shotgun.position.y = this.actionJoey.position.y + 10;
 
+        this.shotgun.rotation = this.game.physics.arcade.angleToPointer(this.shotgun);
+
         if(this.leftInputIsActive()) {
             
             if(!this.actionJoeyModel.direction){
@@ -132,7 +139,7 @@ export default class Title extends Phaser.State {
 
         }
 
-        if(this.input.keyboard.isDown(83)) {
+        if(this.input.activePointer.isDown) {
             this.fireBullet();
             this.playerScore += 100;
             this.scoreText.setText('Score: ' + this.playerScore.toString());
@@ -155,11 +162,10 @@ export default class Title extends Phaser.State {
         bullet.outOfBoundsKill = true;
 
         // Set the bullet position to the gun position.
-        bullet.reset(this.shotgun.position.x, this.shotgun.position.y - 10);
-
-        // Shoot it
-        bullet.body.velocity.x = this.BULLET_SPEED;
-        bullet.body.velocity.y = 0;
+        bullet.reset(this.shotgun.position.x, this.shotgun.position.y - 10);       
+        bullet.rotation = this.shotgun.rotation;
+        bullet.body.velocity.x = Math.cos(bullet.rotation) * this.BULLET_SPEED;
+        bullet.body.velocity.y = Math.sin(bullet.rotation) * this.BULLET_SPEED;
         //this.sfxAudiosprite.play(Phaser.ArrayUtils.getRandomItem(this.sfxLaserSounds));
       
     }
