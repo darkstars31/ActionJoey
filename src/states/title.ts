@@ -22,7 +22,7 @@ export default class Title extends Phaser.State {
 
     // Define constants
     private SHOT_DELAY = 200; // milliseconds (10 bullets/second)
-    private BULLET_SPEED = 650; // pixels/second
+    private BULLET_SPEED = 550; // pixels/second
     private NUMBER_OF_BULLETS = 10;
     private lastBulletShotAt = 0;
     private bulletPool = null;
@@ -69,6 +69,7 @@ export default class Title extends Phaser.State {
              var b = this.game.add.sprite(0, 0, Assets.Images.ImagesBulletPng12.getName());
              this.bulletPool.add(b);
              b.anchor.setTo(.5,.5);
+             b.scale.setTo(.5,.5);
              this.game.physics.enable(b, Phaser.Physics.ARCADE);
              b.kill();
         }
@@ -112,7 +113,6 @@ export default class Title extends Phaser.State {
     public update(): void  {
         this.shotgun.position.x = this.actionJoey.position.x;
         this.shotgun.position.y = this.actionJoey.position.y + 10;
-
         this.shotgun.rotation = this.game.physics.arcade.angleToPointer(this.shotgun);
 
         if(this.leftInputIsActive()) {
