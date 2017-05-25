@@ -29,7 +29,7 @@ export default class Title extends Phaser.State {
         this.backgroundTemplateSprite = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, Assets.Images.ImagesBackgroundTemplate.getName());
         this.backgroundTemplateSprite.anchor.setTo(0.5);
 
-        this.googleFontText = this.game.add.text(this.game.world.centerX, this.game.world.centerY - 100, 'Google Web Fonts', {
+        this.googleFontText = this.game.add.text(this.game.world.centerX, this.game.world.centerY - 100, 'ACTION JOEY', {
             font: '50px ' + Assets.GoogleWebFonts.Barrio
         });
         this.googleFontText.anchor.setTo(0.5);
@@ -58,12 +58,14 @@ export default class Title extends Phaser.State {
         this.bulletPool.add(this.bullet);
         this.game.physics.enable(this.bullet, Phaser.Physics.ARCADE);
         this.bullet.kill();
-        this.shotgun = this.game.add.sprite(null, null, Assets.Images.ImagesShotgun.getName());
         
-
-        this.actionJoey = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 135, Assets.Spritesheets.SpritesheetsActionjoeyspritesheet.getName());
+        this.actionJoey = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 155, Assets.Spritesheets.SpritesheetsActionjoeyspritesheet.getName());
         this.actionJoey.animations.add('walk');
         this.actionJoey.animations.play('walk', 12, true);
+        this.actionJoey.anchor.setTo(.5,.5);
+
+        this.shotgun = this.game.add.sprite(null, null, Assets.Images.ImagesShotgun.getName());
+        this.shotgun.anchor.setTo(.08, .8);
 
 
         this.game.input.keyboard.addKeyCapture(
@@ -88,22 +90,19 @@ export default class Title extends Phaser.State {
 
         this.game.sound.play(Assets.Audio.AudioMusic.getName(), 0.2, true);
 
-        this.backgroundTemplateSprite.inputEnabled = true;
-        this.backgroundTemplateSprite.events.onInputDown.add(() => {
-            this.sfxAudiosprite.play(Phaser.ArrayUtils.getRandomItem(this.sfxLaserSounds));
-        });
+        this.backgroundTemplateSprite.inputEnabled = true;   
 
         this.game.camera.flash(0x000000, 1000);
     }
 
     public update():void  {
-        this.shotgun.position.x = this.actionJoey.position.x - 20;
-        this.shotgun.position.y = this.actionJoey.position.y + 40;
+        this.shotgun.position.x = this.actionJoey.position.x;
+        this.shotgun.position.y = this.actionJoey.position.y;
+
         if(this.leftInputIsActive()) {
             
             if(!this.actionJoeyDirection){
-                this.actionJoeyDirection = true;
-                this.actionJoey.position.x += this.actionJoey.width;
+                this.actionJoeyDirection = true;                
                  this.actionJoey.scale.x = this.actionJoey.scale.x * -1;
             }
                 
@@ -112,8 +111,7 @@ export default class Title extends Phaser.State {
         }
         if(this.rightInputIsActive()) {
              if(this.actionJoeyDirection){
-                this.actionJoeyDirection = false;
-                 this.actionJoey.position.x += this.actionJoey.width;
+                this.actionJoeyDirection = false;               
                  this.actionJoey.scale.x = this.actionJoey.scale.x * -1;
             }
                 
@@ -142,11 +140,12 @@ export default class Title extends Phaser.State {
         bullet.outOfBoundsKill = true;
 
         // Set the bullet position to the gun position.
-        bullet.reset(this.actionJoey.x, this.actionJoey.y + this.actionJoey.height/2);
+        bullet.reset(this.shotgun.position.x, this.shotgun.position.y - 6);
 
         // Shoot it
         bullet.body.velocity.x = this.BULLET_SPEED;
         bullet.body.velocity.y = 0;
+        this.sfxAudiosprite.play(Phaser.ArrayUtils.getRandomItem(this.sfxLaserSounds));
       
     }
 
