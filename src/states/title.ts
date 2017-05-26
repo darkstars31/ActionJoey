@@ -115,23 +115,46 @@ export default class Title extends Phaser.State {
         this.shotgun.position.y = this.actionJoey.position.y + 10;
         this.shotgun.rotation = this.game.physics.arcade.angleToPointer(this.shotgun);
 
-        if(this.leftInputIsActive()) {
+        if(this.input.keyboard.isDown(87)) {
             
             if(!this.actionJoeyModel.direction){
-                this.actionJoeyModel.direction = true;
-                this.flipSprite(this.bullet);
-                this.flipSprite(this.shotgun);                
+                this.actionJoeyModel.direction = true;             
+                this.flipYSprite(this.shotgun);                
                 this.flipSprite(this.actionJoey);
             }
                 
             this.actionJoey.position.x -= this.actionJoeyModel.moveSpeed;
 
         }
-        if(this.rightInputIsActive()) {
+
+           if(this.input.keyboard.isDown(83)) {
+            
+            if(!this.actionJoeyModel.direction){
+                this.actionJoeyModel.direction = true;             
+                this.flipYSprite(this.shotgun);                
+                this.flipSprite(this.actionJoey);
+            }
+                
+            this.actionJoey.position.x -= this.actionJoeyModel.moveSpeed;
+
+        }
+
+
+        if(this.leftInputIsActive() || this.input.keyboard.isDown(65)) {
+            
+            if(!this.actionJoeyModel.direction){
+                this.actionJoeyModel.direction = true;             
+                this.flipYSprite(this.shotgun);                
+                this.flipSprite(this.actionJoey);
+            }
+                
+            this.actionJoey.position.x -= this.actionJoeyModel.moveSpeed;
+
+        }
+        if(this.rightInputIsActive() || this.input.keyboard.isDown(68)) {
              if(this.actionJoeyModel.direction){
-                this.actionJoeyModel.direction = false;  
-                this.flipSprite(this.bullet);      
-                this.flipSprite(this.shotgun);        
+                this.actionJoeyModel.direction = false;                    
+                this.flipYSprite(this.shotgun);        
                 this.flipSprite(this.actionJoey);
             }
                 
@@ -172,6 +195,10 @@ export default class Title extends Phaser.State {
 
     public flipSprite(sprite): void {
         sprite.scale.x = sprite.scale.x * -1;
+    }
+
+    public flipYSprite(sprite): void {
+        sprite.scale.y = sprite.scale.y * -1;
     }
 
     public leftInputIsActive(): any {
