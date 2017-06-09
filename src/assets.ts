@@ -6,10 +6,20 @@ export namespace Images {
 
         static getPNG(): string { return require('assets/images/background_template.png'); }
     }
+    export class ImagesBug {
+        static getName(): string { return 'bug'; }
+
+        static getPNG(): string { return require('assets/images/bug.png'); }
+    }
     export class ImagesBulletPng12 {
         static getName(): string { return 'bullet-png-12'; }
 
         static getPNG(): string { return require('assets/images/bullet-png-12.png'); }
+    }
+    export class ImagesE46ae3d48f6ddefd39a87cfa8f941d45 {
+        static getName(): string { return 'e46ae3d48f6ddefd39a87cfa8f941d45'; }
+
+        static getJPG(): string { return require('assets/images/e46ae3d48f6ddefd39a87cfa8f941d45.jpg'); }
     }
     export class ImagesShotgun {
         static getName(): string { return 'shotgun'; }
@@ -121,6 +131,7 @@ export namespace Audiosprites {
 
 export namespace GoogleWebFonts {
     export const Barrio: string = 'Barrio';
+    export const AllertaStencil: string = 'Allerta Stencil';
 }
 
 export namespace CustomWebFonts {
